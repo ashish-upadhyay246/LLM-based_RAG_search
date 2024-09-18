@@ -3,6 +3,6 @@ Flask==3.0.3
 beautifulsoup4
 streamlit
 requests
-faiss==1.8.0
+faiss-cpu
 google-generativeai==0.8.1
-html5lib==1.1
+html5lib
