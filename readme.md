@@ -17,7 +17,7 @@ This project consists of a Flask backend and a Streamlit frontend that work toge
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/yourusername/genai-assignment.git
+    git clone https://github.com/ashish-upadhyay246/LLM-based_RAG_search.git
     cd genai-assignment
     ```
     or download it.
