@@ -75,7 +75,7 @@ def googlebot(url, sites_required):
             i+=1
             continue
         try:
-            url_open2=requests.get(link)
+            url_open2=requests.get(link, timeout=20)
         except requests.exceptions.RequestException as e:
             print("Error scraping site no.", i)
             mx+=1
