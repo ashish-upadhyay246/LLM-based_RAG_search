@@ -34,7 +34,7 @@ This project consists of a Flask backend and a Streamlit frontend that work toge
     Using `conda`
 
     ```bash
-    conda create --name project_env python=3.8
+    conda create --name project_env
     conda activate project_env
     ```
 
