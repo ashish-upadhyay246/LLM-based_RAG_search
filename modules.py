@@ -12,12 +12,10 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import RequestException
-
 warnings.filterwarnings('ignore') 
 
 load_dotenv()
 
-# API setup
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 MODEL_ID = "models/text-embedding-004"
 
@@ -30,9 +28,6 @@ def googlebot(url, sites_required):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'}
     extracted_links={}
     sites_to_scrape=sites_required+30
-    # if sites_required%10 >5 or sites_required%10==0:
-    #     sites_to_scrape+=20
-    #     print("Prapared an extra page")
     page_count=0
 
     #extracting the search links pagewise.
@@ -45,7 +40,7 @@ def googlebot(url, sites_required):
         url=url_temp+str(page_temp)
 
         url_open = requests.get(url, headers=headers)
-        url_open.raise_for_status()  # Check for HTTP errors
+        url_open.raise_for_status()
         soup = BeautifulSoup(url_open.content, 'html5lib')
         for result in soup.find_all('div', class_='g'):
             heading = result.find('h3')
@@ -98,14 +93,10 @@ def googlebot(url, sites_required):
 def urlbot(url):
     ans = ""
     try:
-        # Send request to the URL
         response = requests.get(url)
-        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
-
-        # Parse HTML content
+        response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html5lib')
         
-        # Extract text from specific tags
         for i in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
             if i.name == 'a' or i.name == 'img':
                 continue
@@ -115,10 +106,8 @@ def urlbot(url):
 
         return ans
     except requests.exceptions.RequestException as e:
-        # Handle request-related errors
         print(f"Request error for URL {url}: {e}")
     except Exception as e:
-        # Handle other unexpected errors
         print(f"Error while processing URL {url}: {e}")
 
 #check query and initiate scraping
@@ -155,8 +144,8 @@ def embed_text_chunk(content, retries=3, backoff_factor=1):
             print(f"Error embedding text chunk ({e}). Retrying in {backoff_factor * (2 ** i)} seconds...")
             time.sleep(backoff_factor * (2 ** i))
     print("Max retries exceeded for embedding text chunk.")
-    return np.zeros((1, 512), dtype='float32')  # Adjust dimensions if necessary
-
+    return np.zeros((1, 512), dtype='float32')
+    
 #creating embeddings for the query
 def embed_query(query):
     print("\nCreating embedding for the query.")
@@ -184,19 +173,14 @@ def retrieve_relevant_chunks(query_embedding, index, text_chunks, sites_required
 def chunk_text(text, chunk_size):
     print("\nCreating chunks.")
     chunk_list= [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
-    # for i, chunk in enumerate(chunk_list):
-    #     print(f"Chunk {i+1}:\n{chunk}\n")
     return chunk_list
 
 #indexing and storing the embeddings 
 def store_embeds(embeddings):
     print("\nStoring embeddings.")
-    # Ensure that embeddings is a 2D array
     faiss_embeddings = np.array(embeddings, dtype='float32')
     dimension = faiss_embeddings.shape[1]
-    # Initialize FAISS index
     index = faiss.IndexFlatL2(dimension)
-    # Add embeddings to the index
     index.add(faiss_embeddings)
     return index
 
@@ -204,7 +188,6 @@ def store_embeds(embeddings):
 def generateResponse(query, relevant_chunks):
     print("Formulating reponse.")
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-    # Step 3: Prepare the prompt for the LLM
     print("\nLength of relevant chunks: ")
     print(len(relevant_chunks))
     context = " ".join(relevant_chunks)
@@ -212,7 +195,6 @@ def generateResponse(query, relevant_chunks):
     rules = "Strictly use the following text as the database only to generate responses for the previous query. Strictly do not use your own database or knowledge about the query. The response length should be directly proportional to the number of relevant chunks. The text will follow after this colon:\n"
     search_prompt = prompt + rules + context
 
-    # Generate the response from the LLM
     response = model.generate_content(search_prompt)
     return response.text
 
