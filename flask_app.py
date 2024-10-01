@@ -11,10 +11,7 @@ def process_data():
         data = request.json
         query = data.get('input', '')
         sites_required=data.get('sites_required', '')
-
         gemini_response= modules.main(query, https_match, sites_required)
-
-        #ensuring response is in JSON format.
         response = {
             "result": gemini_response,
         }
