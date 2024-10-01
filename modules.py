@@ -186,17 +186,21 @@ def store_embeds(embeddings):
 
 #initializing geminiAPI to generate response based on relevant chunks and the query provided.
 def generateResponse(query, relevant_chunks):
-    print("Formulating reponse.")
+    print("Formulating response.")
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+    
     print("\nLength of relevant chunks: ")
     print(len(relevant_chunks))
+    
     context = " ".join(relevant_chunks)
     prompt = f"The query given by the user follows after the colon: {query}\n"
     rules = "Strictly use the following text as the database only to generate responses for the previous query. Strictly do not use your own database or knowledge about the query. The response length should be directly proportional to the number of relevant chunks. The text will follow after this colon:\n"
     search_prompt = prompt + rules + context
 
     response = model.generate_content(search_prompt)
+    print(response)
     return response.text
+
 
 def main(q, https_match, sites_required):
     global link_count
