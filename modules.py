@@ -199,8 +199,6 @@ def generateResponse(query, relevant_chunks, memory):
     print("\nLength of relevant chunks: ")
     print(len(relevant_chunks))
 
-
-    
     context = " ".join(relevant_chunks)
     prompt = f"The query given by the user follows after the colon: {query}\n"
     rules = "You must strictly use only the following text as the database to generate responses. Do not use your own knowledge. If the answer is not in the text, say 'The answer is not available in the provided context.' The relevant text is:\n"
@@ -212,31 +210,31 @@ def generateResponse(query, relevant_chunks, memory):
 
     response = model.generate_content(final_prompt)
 
-    memory.save_context({"input": query}, {"output": response.text})
+    memory.save_context({"input": query}, {"output": ""})
+    # memory.save_context({"input": query}, {"output": response.text})
     return response.text
 
 cached_chunks = None
 cached_embeddings = None
 cached_index = None
-last_query = None
 
 def clear_cache():
-    global cached_chunks, cached_embeddings, cached_index, last_query
+    global cached_chunks, cached_embeddings, cached_index
     cached_chunks = None
     cached_embeddings = None
     cached_index = None
     last_query = None
 
 def main(q, https_match, sites_required):
-    global link_count, cached_chunks, cached_embeddings, cached_index, last_query
+    global link_count, cached_chunks, cached_embeddings, cached_index
     
-    # Load conversation history to get previous queries
+    # # Load conversation history to get previous queries
     conversation_history = memory.load_memory_variables({})
-    # Access the content of HumanMessage objects correctly
+    # # Access the content of HumanMessage objects correctly
     previous_queries = [msg.content for msg in conversation_history.get('history', []) if hasattr(msg, 'content')]
     
-    # Concatenate previous queries with the current query
-    combined_query = " ".join(previous_queries) + " " + q
+    # # Concatenate previous queries with the current query
+    combined_query = " ".join(previous_queries) + q
     print(f"Combined Query: {combined_query}")  # For debugging
 
     if cached_chunks and cached_embeddings and cached_index:
@@ -253,6 +251,4 @@ def main(q, https_match, sites_required):
 
     q_embedding = embed_query(combined_query)  # embedding the combined query
     relevant_chunks = retrieve_relevant_chunks(q_embedding, cached_index, cached_chunks, sites_required)
-    
-    last_query = q
-    return generateResponse(combined_query, relevant_chunks, memory)
+    return generateResponse(q, relevant_chunks, memory)
