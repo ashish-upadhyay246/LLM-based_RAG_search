@@ -1,21 +1,30 @@
 import streamlit as st
 import requests
 
-st.title("GenAI Assignment")
-
-user_input = st.text_input("Prompt")
-
-sites_required=int(st.slider("Number of sites to scrape from.", min_value=3, max_value=30, value=10, step=1, disabled=False, label_visibility="visible"))
-
-click=st.button("Enter", on_click=None, type="secondary", disabled=False, use_container_width=False)
+st.title("LLM based RAG search")
 
 message_placeholder=st.empty()
+user_input=st.chat_input("Write a prompt.")
 
-if click and user_input:
+clear_cache_button = st.button("Clear Cache")
+
+if clear_cache_button:
+    with st.spinner('Clearing cache...'):
+        try:
+            response = requests.post('http://localhost:5000/clear_cache', timeout=10)
+            response.raise_for_status()
+            if response.status_code == 200:
+                st.success("Cache cleared successfully.")
+            else:
+                st.error(f"API returned an error: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error: {e}")
+
+if user_input:
     with st.spinner('Generating response. Please wait...'):
         #send POST request to Flask API
         try:
-            response = requests.post('http://localhost:5000/process', json={"input": user_input,"sites_required": sites_required}, timeout=250)
+            response = requests.post('http://localhost:5000/process', json={"input": user_input,"sites_required": 20}, timeout=250)
             response.raise_for_status()
             if response.status_code == 200:
                 result = response.json()  #parse JSON response from Flask
