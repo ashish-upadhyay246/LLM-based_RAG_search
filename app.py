@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.title("LLM based RAG search")
+st.title("LLM Based RAG Search")
 
 # Initialize session state for chat history if it doesn't exist
 if 'chat_history' not in st.session_state:
@@ -10,8 +10,10 @@ if 'chat_history' not in st.session_state:
 # Function to display chat history
 def display_chat_history():
     for chat in st.session_state.chat_history:
-        st.markdown(st.write(f"**User:** {chat['user']}"))
-        st.markdown(st.write(f"**Bot:** {chat['bot']}"))
+        with st.container():
+            st.markdown(f"**User:** {chat['user']}")
+            st.markdown(f"**Bot:** {chat['bot']}")
+            st.markdown("---")  # Add a horizontal line for separation
 
 # Clear Cache Button
 clear_cache_button = st.button("Clear Cache")

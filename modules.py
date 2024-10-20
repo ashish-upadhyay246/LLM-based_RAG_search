@@ -211,31 +211,27 @@ def generateResponse(query, relevant_chunks, memory):
     response = model.generate_content(final_prompt)
 
     memory.save_context({"input": query}, {"output": ""})
-    # memory.save_context({"input": query}, {"output": response.text})
     return response.text
 
 cached_chunks = None
 cached_embeddings = None
 cached_index = None
 
+# to clear cached chunks and embeddings
 def clear_cache():
     global cached_chunks, cached_embeddings, cached_index
     cached_chunks = None
     cached_embeddings = None
     cached_index = None
-    last_query = None
 
+#driver function
 def main(q, https_match, sites_required):
     global link_count, cached_chunks, cached_embeddings, cached_index
     
-    # # Load conversation history to get previous queries
     conversation_history = memory.load_memory_variables({})
-    # # Access the content of HumanMessage objects correctly
     previous_queries = [msg.content for msg in conversation_history.get('history', []) if hasattr(msg, 'content')]
-    
-    # # Concatenate previous queries with the current query
     combined_query = " ".join(previous_queries) + q
-    print(f"Combined Query: {combined_query}")  # For debugging
+    print(f"Combined Query: {combined_query}")
 
     if cached_chunks and cached_embeddings and cached_index:
         print("\nReusing cached chunks and embeddings.")
